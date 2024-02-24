@@ -12,6 +12,14 @@
             $modelo = readline('Ingrese modelo del Vehículo: ');
             $dniCliente = readline('Ingrese DNI del cliente titular: ');
 
+            foreach ($this->cars as $auto) {
+                if ($auto->getPatente() === $patente) {
+                    echo(PHP_EOL);
+                    echo ('El vehiculo ya está registrado.'); echo(PHP_EOL);
+                    return false;
+                }
+            }
+
             if ($serviceCliente->buscarCliente($dniCliente)) {
                 $autos = new Vehiculo($patente, $marca, $modelo, $dniCliente);
                 $this->cars[] = $autos;
@@ -66,7 +74,10 @@
         
         public function mostrarVehiculos() {
             foreach ($this->cars as $autos) {
-            echo "Patente: {$autos->getPatente()}, Marca: {$autos->getMarca()}, Modelo: {$autos->getModelo()}, DNI Titular: {$autos->getDniCliTit()} \n";
+                echo ('Patente: '.$autos->getPatente().'; ');
+                echo ('Marca: '.$autos->getMarca().'; ');
+                echo ('Modelo: '.$autos->getModelo().'; ');
+                echo ('DNI Titular: '.$autos->getDniCliTit().PHP_EOL);
             }
         }
 

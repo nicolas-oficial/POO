@@ -12,6 +12,7 @@
     
     $servicioCliente->leer();
     $servicioVehiculo->leer();
+    $serviceTurnoServicio->leer();
     
     
     function menuPrincipal() {
@@ -23,6 +24,7 @@
         echo ('1-Clientes.'); echo(PHP_EOL);
         echo ('2-Vehículos.'); echo(PHP_EOL);
         echo ('3-Turnos.'); echo(PHP_EOL);
+        echo ('4-Facturación.'); echo(PHP_EOL);
         echo ('0-Salir.'); echo(PHP_EOL);
     }
             
@@ -153,14 +155,22 @@
                         case 1:
                             echo ('Reservar Turno.'.PHP_EOL);
                             $serviceTurnoServicio->reservaTurno($servicioCliente, $servicioVehiculo); break;
+                        
+                        case 2:
+                            $serviceTurnoServicio->modificarTurno(); break;
+
                         case 3:
                             echo ('Eliminar turno.'.PHP_EOL);
                             $serviceTurnoServicio->eliminarTurno(); break;
+                        
+                        case 4:
+                            $serviceTurnoServicio->buscarTurno(); break;
                         
                         case 5:
                             echo ('Lista de turnos.'.PHP_EOL);
                             $serviceTurnoServicio->mostrarTurnos(); break;
                         case 0:
+                            $serviceTurnoServicio->guardar(); break;
                             echo ('Regresar al Menú Principal.'.PHP_EOL); break;
                         default:
                             echo ('Opción inválida.'.PHP_EOL);
