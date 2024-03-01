@@ -54,12 +54,19 @@
         
         public function mostrarClientes() {
             foreach ($this->clientes as $cliente) {
-                echo ('DNI: '.$cliente->getDni().'; ');
-                echo ('Nombre: '.$cliente->getNombre().'; ');
-                echo ('Apellido: '.$cliente->getApellido().'; ');
-                echo ('Tel: '.$cliente->getTelefono().PHP_EOL);
+            echo "DNI: {$cliente->getDni()}, Nombre: {$cliente->getNombre()}, Apellido: {$cliente->getApellido()}, Teléfono: {$cliente->getTelefono()}\n";
             }
         }       
+
+        public function obtenerClientePorDNI($dni) {
+            foreach ($this->clientes as $cliente) {
+                if ($cliente->getDni() == $dni) {
+                    return $cliente;
+                }
+            }
+            return null; // Si no se encuentra el cliente
+        }
+        
         
         public function buscarCliente() {
             $dni = readline('El DNI a buscar es: ');

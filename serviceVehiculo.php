@@ -74,10 +74,7 @@
         
         public function mostrarVehiculos() {
             foreach ($this->cars as $autos) {
-                echo ('Patente: '.$autos->getPatente().'; ');
-                echo ('Marca: '.$autos->getMarca().'; ');
-                echo ('Modelo: '.$autos->getModelo().'; ');
-                echo ('DNI Titular: '.$autos->getDniCliTit().PHP_EOL);
+            echo "Patente: {$autos->getPatente()}, Marca: {$autos->getMarca()}, Modelo: {$autos->getModelo()}, DNI Titular: {$autos->getDniCliTit()} \n";
             }
         }
 
@@ -90,13 +87,24 @@
                     echo ('Patente: '.$auto->getPatente().'; ');
                     echo ('Marca: '.$auto->getMarca().'; ');
                     echo ('Modelo: '.$auto->getModelo()); echo(PHP_EOL);
-                    return true;
+                    return $auto;
+                    //return true;
                 }
             }
 
             echo ('El vehículo no existe.'); echo(PHP_EOL);
             return false;
         }
+
+        public function obtenerVehiculoPorPatente($patente) {
+            foreach ($this->cars as $vehiculo) {
+                if ($vehiculo->getPatente() == $patente) {
+                    return $vehiculo;
+                }
+            }
+            return null; // Si no se encuentra el vehículo
+        }
+        
 
         public function mostrarAutosClientes() {
             $autosClientes = [];

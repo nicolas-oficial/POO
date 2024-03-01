@@ -5,14 +5,18 @@
     require_once('serviceVehiculo.php');
     require_once('turnoServicio.php');
     require_once('serviceTurnoServicio.php');
-      
+    require_once('facturacion.php');
+    require_once('lib/conexion.php');
+
     $servicioCliente = new ServiceCliente();
     $servicioVehiculo = new ServiceVehiculo();
     $serviceTurnoServicio = new ServiceTurnoServicio();
+    $facturacion = new Facturacion();
     
     $servicioCliente->leer();
     $servicioVehiculo->leer();
     $serviceTurnoServicio->leer();
+    $facturacion->leer();
     
     
     function menuPrincipal() {
@@ -67,6 +71,16 @@
         echo ('3 - Eliminar Turno.'); echo(PHP_EOL);
         echo ('4 - Buscar un Turno.'); echo(PHP_EOL);
         echo ('5 - Mostrar Turnos.'); echo(PHP_EOL);
+        echo ('0 - Salir.'); echo(PHP_EOL);
+    }
+
+    function menuFacturacion() {
+
+        echo ('============================'); echo(PHP_EOL);
+        echo ('Menú Facturación.'); echo(PHP_EOL);
+        echo ('============================'); echo(PHP_EOL);
+        echo ('1 - Confeccionar Factura.'); echo(PHP_EOL);
+        echo ('2 - Mostrar Factura.'); echo(PHP_EOL);
         echo ('0 - Salir.'); echo(PHP_EOL);
     }
     
@@ -169,9 +183,34 @@
                         case 5:
                             echo ('Lista de turnos.'.PHP_EOL);
                             $serviceTurnoServicio->mostrarTurnos(); break;
+
                         case 0:
                             $serviceTurnoServicio->guardar(); break;
                             echo ('Regresar al Menú Principal.'.PHP_EOL); break;
+                        default:
+                            echo ('Opción inválida.'.PHP_EOL);
+                    }
+                }
+                break;
+            
+            case 4:
+                echo ('Facturación.'.PHP_EOL);
+                $opcionF = "";
+                while ($opcionF != 0) {
+                    menuFacturacion();
+                    $opcionF = readline ('Ingrese una opción: ');
+                    switch ($opcionF) {
+                        case 1:
+                            echo ('Confeccionar Factura: '); echo(PHP_EOL);
+                            
+                            $facturacion->hacerFactura(); break;
+                        
+                        case 2:
+                            $facturacion->mostrarFactura(); break; 
+
+                        case 0:
+                            $facturacion->guardar(); break;
+                            echo ('Menú Principal.'.PHP_EOL); break;
                         default:
                             echo ('Opción inválida.'.PHP_EOL);
                     }
