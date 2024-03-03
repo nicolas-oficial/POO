@@ -18,10 +18,39 @@ class Facturacion {
     
         $this->facturas[$patente] = $factura;
     
-        echo ('Factura guardada.'.PHP_EOL);
+        echo "Factura guardada correctamente para la patente $patente.\n";
     }
     
     
+    public function mostrarFactura() {
+        // Verificar si hay alguna factura guardada
+        if (!$this->facturas) {
+            echo "No hay facturas guardadas.\n";
+            return;
+        }
+    
+        echo ('Mostrar Factura.'.PHP_EOL);
+        $patente = readline('Ingrese patente del vehículo: ');
+
+        // Verificar si la patente existe en las facturas guardadas
+        if (isset($this->facturas[$patente])) {
+            echo (PHP_EOL);
+            echo ('Servicio Pos Venta AUTOMOTION.'.PHP_EOL);
+            echo ('Factura Nº: '); echo(PHP_EOL);
+            echo ('Vehiculo Patente: '.$patente); echo(PHP_EOL);
+            echo ('-----------------------------'.PHP_EOL);
+            echo ('Servicios realizados:'.PHP_EOL);
+            $total = 0;
+            foreach ($this->facturas[$patente] as $servicio => $costo) {
+                echo "- $servicio: $" . $costo . PHP_EOL;
+                $total += $costo;
+            }
+            // Calcular y mostrar el total
+            echo ('Costo total: $ '. $total . PHP_EOL);
+        } else {
+            echo ('No se encontró ninguna factura para la patente: ' .$patente .PHP_EOL);
+        }
+    }
     
     public function guardar() {
         $arrSer = serialize($this->facturas);
