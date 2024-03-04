@@ -51,6 +51,19 @@ class Facturacion {
             echo ('No se encontró ninguna factura para la patente: ' .$patente .PHP_EOL);
         }
     }
+
+    public function eliminarFactura() {
+        $patente = readline ('Ingrese patente a eliminar Factura: ');
+    
+        if (isset($this->facturas[$patente])) {
+            unset($this->facturas[$patente]);
+            echo ('La Factura fue eliminada.'.PHP_EOL);
+            return true;
+        } else {
+            echo ('No existe Factura para patente: '.$patente); echo (PHP_EOL);
+            return false;
+        }
+    }
     
     public function guardar() {
         $arrSer = serialize($this->facturas);

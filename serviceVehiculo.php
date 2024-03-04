@@ -74,7 +74,10 @@
         
         public function mostrarVehiculos() {
             foreach ($this->cars as $autos) {
-            echo "Patente: {$autos->getPatente()}, Marca: {$autos->getMarca()}, Modelo: {$autos->getModelo()}, DNI Titular: {$autos->getDniCliTit()} \n";
+                echo ('Patente: '.$autos->getPatente().'; ');
+                echo ('Marca: '.$autos->getMarca().'; ');
+                echo ('Modelo: '.$autos->getModelo().'; ');
+                echo ('DNI Titular: '.$autos->getDniCliTit().PHP_EOL);
             }
         }
 

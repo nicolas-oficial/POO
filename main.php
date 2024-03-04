@@ -6,8 +6,7 @@
     require_once('turnoServicio.php');
     require_once('serviceTurnoServicio.php');
     require_once('facturacion.php');
-    require_once('lib/conexion.php');
-
+      
     $servicioCliente = new ServiceCliente();
     $servicioVehiculo = new ServiceVehiculo();
     $serviceTurnoServicio = new ServiceTurnoServicio();
@@ -81,6 +80,7 @@
         echo ('============================'); echo(PHP_EOL);
         echo ('1 - Confeccionar Factura.'); echo(PHP_EOL);
         echo ('2 - Mostrar Factura.'); echo(PHP_EOL);
+        echo ('3 - Eliminar Factura.'); echo(PHP_EOL);
         echo ('0 - Salir.'); echo(PHP_EOL);
     }
     
@@ -207,6 +207,9 @@
                         
                         case 2:
                             $facturacion->mostrarFactura(); break; 
+                        
+                        case 3:
+                            $facturacion->eliminarFactura(); break;
 
                         case 0:
                             $facturacion->guardar(); break;
