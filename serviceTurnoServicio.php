@@ -1,5 +1,5 @@
 <?php
-    require_once ('turnoServicio.php');         // agregar funcion para grabar y leer json
+    require_once ('turnoServicio.php');         
 
     class ServiceTurnoServicio {
 
@@ -8,6 +8,7 @@
         public function reservaTurno($servicioCliente, $servicioVehiculo) {
           
             $fecha = readline('Ingrese la fecha del turno (dd-mm-yyyy): ');
+            $fecha_mysql = date('Y-m-d', strtotime($fecha));
             $hora = readline('Ingrese la hora del turno (HH:MM): ');
             foreach ($this->turnos as $t) {
                 if ($t->getFecha() === $fecha && $t->getHora() === $hora) {
@@ -19,8 +20,6 @@
             $tipoServicio = readline('Describa el servicio a realizar: ');
             $patente = readline('Ingrese la patente del vehículo: ');
             $dniCli = readline('Ingrese el DNI del cliente titular: '); echo(PHP_EOL);
-
-            
             
             echo ('Verificación de existencia para Cliente y Vehículo'); echo(PHP_EOL);
             
@@ -37,6 +36,18 @@
     
             $turno = new TurnoServicio($fecha, $hora, $tipoServicio, $patente, $dniCli);
             $this->turnos[] = $turno;
+
+            $conexion = ConexionBD::obtenerInstancia();
+            $bd = $conexion->obtenerConexion();
+            $addTurno = "INSERT INTO turnos (fecha, hora, tipo_servicio, patente, dni_cliente) VALUES ('$fecha_mysql', '$hora', '$tipoServicio', '$patente', '$dniCli')";
+
+            if ($bd->query($addTurno) === TRUE) {
+                echo(PHP_EOL);
+                echo ('Turno agregado correctamente a la base de datos.'.PHP_EOL);
+            } else {
+                echo ('Error al agregar el turno. '. $bd->error .PHP_EOL);
+                return;
+            }
     
             echo ('El turno fue reservado correctamente.'.PHP_EOL);
             return true;
@@ -49,6 +60,7 @@
             foreach ($this->turnos as $t) {
                 if ($t->getPatente() == $patente) {
                   $newFecha = readline ('Ingrese nueva Fecha (dd-mm-yyyy): ');
+                  $fecha_mysql = date('Y-m-d', strtotime($newFecha));
                   $newHora = readline ('Ingrese Hora (HH:MM): ');
                   foreach ($this->turnos as $turno) {
                     if ($turno !== $t && $turno->getFecha() === $newFecha && $turno->getHora() === $newHora) {
@@ -57,14 +69,33 @@
                         return false;
                     }
                 }
-                  $newServicio = readline ('Describa Servicio a realizar: ');
-                  $newPatente = readline ('Ingrese nueva patente: ');
-                  $newDniCli = readline ('DNI de cliente Titular: ');
-                  $t->setFecha($newFecha);
-                  $t->setHora($newHora);
-                  $t->setTipoServicio($newServicio);
-                  $t->setPatente($newPatente);
-                  $t->setDniCli($newDniCli);
+                $newServicio = readline ('Describa Servicio a realizar: ');
+                $newPatente = readline ('Ingrese nueva patente: ');
+                $newDniCli = readline ('DNI de cliente Titular: ');
+                $t->setFecha($newFecha);
+                $t->setHora($newHora);
+                $t->setTipoServicio($newServicio);
+                $t->setPatente($newPatente);
+                $t->setDniCli($newDniCli);
+
+                $conexion = ConexionBD::obtenerInstancia();
+                $bd = $conexion->obtenerConexion();
+                $modTurno = "UPDATE turnos 
+                    SET fecha ='$fecha_mysql', 
+                        hora ='$newHora', 
+                        tipo_servicio ='$newServicio', 
+                        patente ='$newPatente',
+                        dni_cliente ='$newDniCli'
+                    WHERE patente ='$patente'";
+        
+                    
+                if ($bd->query($modTurno) === TRUE) {
+                    echo ('El Turno se ha modificado en la base de datos.' . PHP_EOL);
+                    return true;
+                } else {
+                    echo ('Error al modificar Turno en la base de datos. ' .PHP_EOL);
+                    return false;
+                }
 
                   echo ('El turno se ha modificado.'.PHP_EOL);
                   return true;
@@ -77,15 +108,26 @@
         
         public function eliminarTurno() {
             $patente = readline('Ingrese la patente del vehículo: ');
-            $dniCli = readline('Ingrese el DNI del cliente titular: ');
-        
             $buscaTurno = false;
         
             foreach ($this->turnos as $key => $turno) {
-                if ($turno->getPatente() === $patente && $turno->getDniCli() === $dniCli) {
+                if ($turno->getPatente() === $patente) {
+            
                     unset($this->turnos[$key]);
                     $buscaTurno = true;
-                    break;
+                    //break;
+
+                    $conexion = ConexionBD::obtenerInstancia();
+                    $bd = $conexion->obtenerConexion();
+                    $delPat = "DELETE FROM turnos WHERE patente = '$patente'";
+                    
+                    if ($bd->query($delPat) === TRUE) {
+                        echo ('El Turno se ha eliminado de la base de datos.'.PHP_EOL);
+                        return true;
+                    } else {
+                        echo ('Error al eliminar Turno.'. $bd->error .PHP_EOL);
+                        return false;
+                    }
                 }
             }
         
@@ -96,50 +138,66 @@
             }
         }
 
-        
         public function buscarTurno() {
-            $patente = readline ('Ingrese Patente: ');
-            $turnoBuscado = false;
-        
-            foreach ($this->turnos as $t) {
-                if ($t->getPatente() == $patente) {
-                    echo ('Turno encontrado:'.PHP_EOL);
-                    echo ('Fecha: '.$t->getFecha().'; ');
-                    echo ('Hora: '.$t->getHora().'; ');
-                    echo ('Tipo de Servicio: '.$t->getTipoServicio()) . PHP_EOL;
-                    echo ('Patente: '.$t->getPatente().'; ');
-                    echo ('DNI Titular: '.$t->getDniCli().'; ') . PHP_EOL;
-                    $turnoBuscado = true;
+            $patente = readline('Ingrese Patente: ');
+            
+            $conexion = ConexionBD::obtenerInstancia();
+            $bd = $conexion->obtenerConexion();
+            
+            $getTurno = "SELECT * FROM turnos WHERE patente = '$patente'";
+            $result = $bd->query($getTurno);
+            
+            if ($result->num_rows > 0) {
+                while ($fila = $result->fetch_assoc()) {
+                    $fecha = date('d-m-Y', strtotime($fila['fecha']));
+                    $hora = date('H:i', strtotime($fila['hora']));
+                    
+                    echo ('Turno encontrado:' . PHP_EOL);
+                    echo ('---------------------------------------------------------------------------'.PHP_EOL);
+                    echo ('Fecha: ' . $fecha. '; ');
+                    echo ('Hora: ' . $hora.'; ');
+                    echo ('Tipo de Servicio: '.$fila['tipo_servicio'].PHP_EOL);
+                    echo ('Patente: ' . $fila['patente'].'; ');
+                    echo ('DNI Titular: ' . $fila['dni_cliente'] . '; '. PHP_EOL);
+                    echo ('---------------------------------------------------------------------------'.PHP_EOL);
                 }
-            }
-        
-            if (!$turnoBuscado) {
+                return true;
+            } else {
                 echo ('El turno No existe.' . PHP_EOL);
                 return false;
             }
-        
-            return true;
         }
-        
-        
+
+
         public function mostrarTurnos() {
-            if (count($this->turnos) === 0) {
+            $conexion = ConexionBD::obtenerInstancia();
+            $bd = $conexion->obtenerConexion();
+        
+            $getTurnos = "SELECT fecha, DATE_FORMAT(hora, '%H:%i') AS hora, tipo_servicio, patente, dni_cliente 
+                FROM turnos";
+            $result = $bd->query($getTurnos);
+        
+            if ($result->num_rows === 0) {
                 echo ('No hay turnos programados.'.PHP_EOL); 
+                return false;
             } else {
                 echo ('Turnos programados:'.PHP_EOL);
                 echo(PHP_EOL);
-                foreach ($this->turnos as $turno) {
-                    echo ('Fecha: '.$turno->getFecha().'; ');
-                    echo ('Hora: '.$turno->getHora().'; ');
-                    echo ('Servicio: '.$turno->getTipoServicio()); echo(PHP_EOL);
-                    echo ('Patente: '.$turno->getPatente().'; ');
-                    echo ('DNI de Titular: '.$turno->getDniCli().PHP_EOL);
+                
+                while ($resultados = $result->fetch_assoc()) {
+                    $fecha = date('d-m-Y', strtotime($resultados['fecha']));
+                    echo ('Fecha: '.$fecha.'; ');
+                    echo ('Hora: '.$resultados['hora'].'; ');
+                    echo ('Servicio: '.$resultados['tipo_servicio'].PHP_EOL);
+                    echo ('Patente: '.$resultados['patente'].'; ');
+                    echo ('DNI de Titular: '.$resultados['dni_cliente'].PHP_EOL);
                     echo ('------------------------------------------------------------'); echo(PHP_EOL);
                 }
                 return true;
             }
         }
-
+        
+        /*
         public function guardar() {
             $arrSer = serialize($this->turnos);
             file_put_contents("turnos.json", $arrSer);
@@ -150,4 +208,5 @@
             $arrOrig = unserialize($recArr);
             $this->turnos = $arrOrig;
         }
+        */
     }

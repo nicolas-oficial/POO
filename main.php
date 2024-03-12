@@ -6,16 +6,20 @@
     require_once('turnoServicio.php');
     require_once('serviceTurnoServicio.php');
     require_once('facturacion.php');
+    require_once('lib/conexion.php');
       
     $servicioCliente = new ServiceCliente();
     $servicioVehiculo = new ServiceVehiculo();
     $serviceTurnoServicio = new ServiceTurnoServicio();
     $facturacion = new Facturacion();
+
+   $conexion = ConexionBD::obtenerInstancia();
+   $bd = $conexion->obtenerConexion();
     
-    $servicioCliente->leer();
-    $servicioVehiculo->leer();
-    $serviceTurnoServicio->leer();
-    $facturacion->leer();
+    //$servicioCliente->leer();
+    //$servicioVehiculo->leer();
+    //$serviceTurnoServicio->leer();
+    //$facturacion->leer();
     
     
     function menuPrincipal() {
@@ -112,13 +116,12 @@
                             echo('Seleccionaste buscar un cliente.'.PHP_EOL);
                             $servicioCliente->buscarCliente(); break;
                         case 5: 
-                            echo('Lista de clientes.'.PHP_EOL);
                             $servicioCliente->mostrarClientes(); break;
                         case 6:
                             echo('Vehículo de Cliente: '.PHP_EOL);
                             $servicioVehiculo->mostrarAutosClientes(); break;
                         case 0: 
-                            $servicioCliente->grabar(); break;
+                            //$servicioCliente->grabar(); break;
                             echo ('Regresar al Menú Principal.'.PHP_EOL);
                             echo (PHP_EOL); break;
                         default: 
@@ -148,10 +151,9 @@
                             echo('Seleccionaste buscar un vehículo.'.PHP_EOL);
                             $servicioVehiculo->buscarAuto(); break;
                         case 5: 
-                            echo('Seleccionaste lista de vehículos.'.PHP_EOL);
                             $servicioVehiculo->mostrarVehiculos(); break;
                         case 0: 
-                            $servicioVehiculo->grabar(); break;
+                            //$servicioVehiculo->grabar(); break;
                             echo ('Regresar al Menú Principal.'.PHP_EOL); break;
                         default: 
                             echo ('Opción inválida.'.PHP_EOL);
@@ -185,7 +187,7 @@
                             $serviceTurnoServicio->mostrarTurnos(); break;
 
                         case 0:
-                            $serviceTurnoServicio->guardar(); break;
+                            //$serviceTurnoServicio->guardar(); break;
                             echo ('Regresar al Menú Principal.'.PHP_EOL); break;
                         default:
                             echo ('Opción inválida.'.PHP_EOL);
@@ -212,7 +214,7 @@
                             $facturacion->eliminarFactura(); break;
 
                         case 0:
-                            $facturacion->guardar(); break;
+                            //$facturacion->guardar(); break;
                             echo ('Menú Principal.'.PHP_EOL); break;
                         default:
                             echo ('Opción inválida.'.PHP_EOL);
