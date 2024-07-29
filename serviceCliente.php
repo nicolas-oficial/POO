@@ -5,19 +5,45 @@
 
         private $clientes = [];
 
-        // Función para agregar un nuevo cliente
+
+        public function __construct() {
+            $this->cargarClientes();
+        }
+    
+        private function cargarClientes() {
+            $conexion = ConexionBD::obtenerInstancia();
+            $bd = $conexion->obtenerConexion();
+    
+            $query = "SELECT dni, nombre, apellido, tel, email FROM clientes";
+            $resultado = $bd->query($query);
+    
+            if ($resultado->num_rows > 0) {
+                while ($fila = $resultado->fetch_assoc()) {
+                    $cliente = new Cliente($fila['dni'], $fila['nombre'], $fila['apellido'], $fila['tel'], $fila['email']);
+                    $this->clientes[$fila['dni']] = $cliente;
+                }
+            }
+        }
         
         public function agregarCliente() {
-            $dni = readline('Ingrese el DNI del cliente: ');            
+            $dni = readline('Ingrese el DNI del cliente: ');       
+            
+            if (isset($this->clientes[$dni])) {
+                echo ('El cliente ya existe.'. PHP_EOL);
+                return;
+            }
+
             $nombre = readline('Ingrese nombre del Cliente: ');
             $apellido = readline('Ingrese el apellido del Cliente: ');
             $telefono = readline('Ingrese tel del Cliente: ');
-            $cliente = new Cliente($dni, $nombre, $apellido, $telefono);
+            $mail = readline('Ingrese email del cliente: ');
+            $cliente = new Cliente($dni, $nombre, $apellido, $telefono, $mail);
             $this->clientes[$dni] = $cliente;
 
             $conexion = ConexionBD::obtenerInstancia();
             $bd = $conexion->obtenerConexion();
-            $addCli = "INSERT INTO clientes (dni, nombre, apellido, tel) VALUES ('$dni', '$nombre', '$apellido', '$telefono')";
+
+            $addCli = "INSERT INTO clientes (dni, nombre, apellido, tel, email) VALUES ('$dni', '$nombre', '$apellido', '$telefono', '$mail')";
 
             if ($bd->query($addCli) === TRUE) {
                 echo(PHP_EOL);
@@ -28,76 +54,126 @@
             }
         }
 
-        // Función para modificar los datos de un cliente existente
         
         public function modificarCliente() {
-            $dni = readline('El Dni del cliente a modificar es: ');
+            $dni = readline('El DNI del cliente a modificar es: ');
         
-            foreach ($this->clientes as $cli) {
-                if ($cli->getDni() == $dni) {
-                    $newdni = readline('Nuevo Dni: ');
-                    $newnombre = readline('Nuevo Nombre: ');
-                    $newapellido = readline('Nuevo Apellido: ');
-                    $newtel = readline('Nuevo Tel: ');
-                    $cli->setDni($newdni);
-                    $cli->setNombre($newnombre);
-                    $cli->setApellido($newapellido);
-                    $cli->setTelefono($newtel);
+            if (isset($this->clientes[$dni])) {
+                $cli = $this->clientes[$dni];
         
-                    $conexion = ConexionBD::obtenerInstancia();
-                    $bd = $conexion->obtenerConexion();
-                    $modCli = "UPDATE clientes 
-                        SET dni='$newdni', 
-                            nombre='$newnombre', 
-                            apellido='$newapellido', 
-                            tel='$newtel' 
-                        WHERE dni='$dni'";
+                $newdni = readline('Nuevo DNI: ');
+                $newnombre = readline('Nuevo Nombre: ');
+                $newapellido = readline('Nuevo Apellido: ');
+                $newtel = readline('Nuevo Tel: ');
+                $newmail = readline('Nuevo Email: ');
         
-                    
-                    if ($bd->query($modCli) === TRUE) {
-                        echo ('El Cliente se ha modificado en la base de datos.' . PHP_EOL);
-                        return true;
-                    } else {
-                        echo ('Error al modificar el cliente en la base de datos. ' .PHP_EOL);
-                        return false;
-                    }
+                $cli->setDni($newdni);
+                $cli->setNombre($newnombre);
+                $cli->setApellido($newapellido);
+                $cli->setTelefono($newtel);
+                $cli->setMail($newmail);
+        
+                if ($newdni !== $dni) {
+                    unset($this->clientes[$dni]);
+                    $this->clientes[$newdni] = $cli;
                 }
+        
+                echo ('Cliente modificado.'. PHP_EOL);
+        
+                $conexion = ConexionBD::obtenerInstancia();
+                $bd = $conexion->obtenerConexion();
+                $modCli = "UPDATE clientes 
+                    SET dni='$newdni', 
+                        nombre='$newnombre', 
+                        apellido='$newapellido', 
+                        tel='$newtel',
+                        email='$newmail'
+                    WHERE dni='$dni'";
+        
+                if ($bd->query($modCli) === TRUE) {
+                    echo ('El Cliente se ha modificado en la base de datos.' . PHP_EOL);
+                    return true;
+                } else {
+                    echo ('Error al modificar el cliente en la base de datos.' . PHP_EOL);
+                    return false;
+                }
+            } else {
+                echo ('No se encontró el cliente.'. PHP_EOL);
+                return false; 
             }
-                    echo ('El Cliente No existe.'.PHP_EOL);
-                    return false;  
         }
-
-        // Función para eliminar un cliente
+        
         
         public function eliminarCliente() {          
-            $dni = readline('El DNI del cliente a dar de baja es: ');           
-            
-            $conexion = ConexionBD::obtenerInstancia();
-            $bd = $conexion->obtenerConexion();
-            
-            $delCli = "DELETE FROM clientes WHERE dni = '$dni'";
-            if ($bd->query($delCli) === TRUE) {
-                echo ('El cliente se ha eliminado de la base de datos.'.PHP_EOL);
-
-                foreach ($this->clientes as $cli => $c) {
-                    if ($c->getDni() === $dni) {
-                        unset($this->clientes[$cli]);
-                        echo ('El cliente se ha eliminado de la aplicación.'.PHP_EOL);
-                        return true;
-                    }
-                } 
-
-            } else {
-                echo ('Error al eliminar el cliente.'. $bd->error .PHP_EOL);
-                return false;
-            }
-            
-            echo ('Cliente No encontrado.' . PHP_EOL);
-            return false;
-        }
+            $dni = readline('El DNI del cliente a dar de baja es: ');
         
+            if (isset($this->clientes[$dni])) {
+                unset($this->clientes[$dni]);
+                echo ('Cliente eliminado.' . PHP_EOL);
+        
+                $conexion = ConexionBD::obtenerInstancia();
+                $bd = $conexion->obtenerConexion();
+                
+                $delCli = "DELETE FROM clientes WHERE dni = '$dni'";
+                if ($bd->query($delCli) === TRUE) {
+                    echo ('El cliente se ha eliminado de la base de datos.' . PHP_EOL);
+                } else {
+                    echo ('Error al eliminar el cliente de la base de datos: ' . $bd->error . PHP_EOL);
+                    return false;
+                }
+            } else {
+                echo ('Cliente no encontrado.' . PHP_EOL);
+            }
+        }
 
         public function mostrarClientes() {
+            if (count($this->clientes) > 0) {
+                echo ('Lista de Clientes:' . PHP_EOL);
+                foreach ($this->clientes as $cliente) {
+                    echo ('DNI: ' . $cliente->getDni() . '; ');
+                    echo ('Nombre: ' . $cliente->getNombre() . '; ');
+                    echo ('Apellido: ' . $cliente->getApellido() . '; ');
+                    echo ('Teléfono: ' . $cliente->getTelefono() . '; ');
+                    echo ('Email: ' . $cliente->getMail() . PHP_EOL);
+                    echo ('--------------------------------------------------------------------------');
+                    echo (PHP_EOL);
+                }
+            } else {
+                echo "No existen clientes en el sistema." . PHP_EOL;
+            }
+        }
+
+        /*
+        public function mostrarClientes() {
+            foreach ($this->clientes as $dni => $cliente) {
+                echo ('DNI: ' . $cliente->getDni() . '; ');
+                echo ('Nombre: ' . $cliente->getNombre() . '; ');
+                echo ('Apellido: ' . $cliente->getApellido() . '; ');
+                echo ('Teléfono: ' . $cliente->getTelefono() . '; ');
+                echo ('Email: ' . $cliente->getMail() . PHP_EOL);
+                echo ('--------------------------------------------------------------------------');
+                echo (PHP_EOL);
+            }
+        }
+            */
+        
+        /*
+        public function mostrarClientes() {
+
+            if (count($this->clientes) === 0) {
+                echo ('No existen clientes en el sistema.' .PHP_EOL);
+                return;
+            }
+
+            foreach ($this->clientes as $cliente) {
+                echo "DNI: " . $cliente->getDni() . PHP_EOL;
+                echo "Nombre: " . $cliente->getNombre() . PHP_EOL;
+                echo "Apellido: " . $cliente->getApellido() . PHP_EOL;
+                echo "Teléfono: " . $cliente->getTelefono() . PHP_EOL;
+                echo "Email: " . $cliente->getMail() . PHP_EOL;
+                echo "-----------------------------" . PHP_EOL;
+            }
+
             $conexion = ConexionBD::obtenerInstancia();
             $bd = $conexion->obtenerConexion();
         
@@ -116,24 +192,14 @@
                 echo ('DNI: ' . $resultados['dni'] . '; ');
                 echo ('Nombre: ' . $resultados['nombre'] . '; ');
                 echo ('Apellido: ' . $resultados['apellido'] . '; ');
-                echo ('Tel: ' . $resultados['tel'] . PHP_EOL);
+                echo ('Tel: ' . $resultados['tel'] . '; ');
+                echo ('Mail: ' . $resultados['email'] . PHP_EOL);
                 echo ('------------------------------------------------------------');
                 echo (PHP_EOL);
             }
             return true;
         }
-    
-        /*
-        public function obtenerClientePorDNI($dni) {
-            foreach ($this->clientes as $cliente) {
-                if ($cliente->getDni() == $dni) {
-                    return $cliente;
-                }
-            }
-            return null; 
-        }
         */
-
         
         public function buscarCliente() {
             $dni = readline('El DNI a buscar es: ');
@@ -152,7 +218,8 @@
                     echo ('DNI: ' . $fila['dni'].'; ');
                     echo ('Nombre: ' . $fila['nombre'].'; ');
                     echo ('Apellido: ' . $fila['apellido'].'; ');
-                    echo ('Tel: ' . $fila['tel'].PHP_EOL);
+                    echo ('Tel: ' . $fila['tel'].'; ');
+                    echo ('Mail: ' . $fila['email'] . PHP_EOL);
                     echo ('---------------------------------------------------------------------------'.PHP_EOL);
                 }
                 return true;
@@ -161,7 +228,6 @@
                 return false;
             }
         }
-        
         
         /*
         public function grabar() {
@@ -177,6 +243,11 @@
             $this->clientes = $arrOrig;
         }
         */
+
+        public function getClientes() {
+            return $this->clientes;
+        }
+
 
         public function salida() {
             echo ('================================='); echo(PHP_EOL);

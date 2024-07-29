@@ -6,12 +6,14 @@ class Cliente {
     private $nombre;
     private $apellido;
     private $telefono;
+    private $mail;
 
-    public function __construct($dni, $nombre, $apellido, $telefono) {
+    public function __construct($dni, $nombre, $apellido, $telefono, $mail) {
         $this->dni = $dni;
         $this->nombre = $nombre;
         $this->apellido = $apellido;
         $this->telefono = $telefono;
+        $this->mail = $mail;
     }
 
     public function getDni() {
@@ -30,6 +32,10 @@ class Cliente {
         return $this->telefono;
     }
 
+    public function getMail() {
+        return $this->mail;
+    }
+
     
     public function setDni($dni) {
         $this->dni = $dni;
@@ -45,5 +51,9 @@ class Cliente {
 
     public function setTelefono($telefono) {
         $this->telefono = $telefono;
+    }
+
+    public function setMail($mail) {
+        $this->mail = $mail;
     }
 }

@@ -3,156 +3,138 @@
 
     class ServiceVehiculo {          
                                     
-        private $cars = [];           
-
-        // Función para agregar un nuevo auto
-
-        public function agregarAuto($serviceCliente) {
-            $conexion = ConexionBD::obtenerInstancia();
-            $bd = $conexion->obtenerConexion();
+        private $cars = [];  
+        private $serviceCliente;
         
+        public function agregarAuto() {
             $patente = readline('Ingrese la patente del vehículo: ');
-        
-            $checkPatente = "SELECT * FROM vehiculos WHERE patente = '$patente'";
-            $result = $bd->query($checkPatente);
-        
-            if ($result && $result->num_rows > 0) {
-                echo ('La patente ya está registrada en otro vehículo.' . PHP_EOL);
-                return false;
-            }
-        
-            $marca = readline('Ingrese marca del vehículo: ');
-            $modelo = readline('Ingrese modelo del Vehículo: ');
-            $dniCliente = readline('Ingrese DNI del cliente titular: ');
-        
-            if ($serviceCliente->buscarCliente($dniCliente)) {
-                $autos = new Vehiculo($patente, $marca, $modelo, $dniCliente);
-                $this->cars[] = $autos;
-                echo ('El vehiculo se ha cargado correctamente.'.PHP_EOL);
-            } else {
-                echo ('El cliente No existe, ingrese Cliente.'.PHP_EOL);
-                return false;
-            }
-        
-            $addVeh = "INSERT INTO vehiculos (patente, marca, modelo, dni_cliente) VALUES ('$patente', '$marca', '$modelo', '$dniCliente')";
-        
-            if ($bd->query($addVeh) === TRUE) {
-                echo(PHP_EOL);
-                echo ('Vehículo agregado correctamente a la base de datos.'.PHP_EOL);
-            } else {
-                echo ('Error al agregar el Vehiculo. ' . $bd->error.PHP_EOL);
-            }
-        }
-       /*
-        public function agregarAuto($serviceCliente) {
-            $patente = readline('Ingrese la patente del vehículo: ');            
-            $marca = readline('Ingrese marca del vehículo: ');
-            $modelo = readline('Ingrese modelo del Vehículo: ');
-            $dniCliente = readline('Ingrese DNI del cliente titular: ');
-
-            if ($serviceCliente->buscarCliente($dniCliente)) {
-                $autos = new Vehiculo($patente, $marca, $modelo, $dniCliente);
-                $this->cars[] = $autos;
-                echo ('El vehiculo se ha cargado correctamente.'.PHP_EOL);
-                //return true;
-            } else {
-                echo ('El cliente No existe, ingrese Cliente.'.PHP_EOL);
-                return false;
-            }
-
-            $conexion = ConexionBD::obtenerInstancia();
-            $bd = $conexion->obtenerConexion();
-            $addVeh = "INSERT INTO vehiculos (patente, marca, modelo, dni_cliente) VALUES ('$patente', '$marca', '$modelo', '$dniCliente')";
-        
-            if ($bd->query($addVeh) === TRUE) {
-                echo(PHP_EOL);
-                echo ('Vehículo agregado correctamente a la base de datos.'.PHP_EOL);
-            } else {
-                echo ('Error al agregar el Vehiculo. ' . $bd->error.PHP_EOL);
-            }
-        }
-        */
-
-        // Función para modificar los datos de un auto
-        public function modificarAuto() {
-            $dniCliente = readline('Ingrese el DNI del cliente: ');
-            $patente = readline ('Ingrese la patente del Vehículo a modificar: ');
-        
-            $conexion = ConexionBD::obtenerInstancia();
-            $bd = $conexion->obtenerConexion();
-        
-            $newpat = readline('Nueva Patente: ');
-            $newmarca = readline('Ingrese Marca: ');
-            $newmodelo = readline('Ingrese Modelo: ');
-        
-            $modVeh = "UPDATE vehiculos 
-                SET patente = '$newpat', 
-                    marca = '$newmarca', 
-                    modelo = '$newmodelo' 
-                WHERE dni_cliente = '$dniCliente' AND patente = '$patente'";
-        
-            if ($bd->query($modVeh) === TRUE) {
-                echo ('El vehículo fue modificado en la base de datos.' . PHP_EOL);
-                return true;
-            } else {
-                echo ('Error al modificar el vehiculo en la base de datos. ' . $bd->error . PHP_EOL);
-                return false;
-            }
-        }
-       
-        // Función para eliminar un vehiculo
-        
-        public function eliminarAuto() {          
-            $patente = readline('Ingrese Patente: ');           
-            foreach ($this->cars as $auto => $c) {
-                if ($c->getPatente() === $patente) {
-                    if ($c->getDniCliTit() !== null) {       // verifico auto asociado a cliente
-                        $c->setDniCliTit(null);              // desvinculo auto de cliente
-                    }
-                    unset($this->cars[$auto]);
-                    echo ('El vehículo se ha eliminado.'.PHP_EOL);
+    
+            foreach ($this->cars as $vehiculo) {
+                if ($vehiculo->getPatente() === $patente) {
+                    echo ('El vehículo patente '. $patente . ' ya existe.' . PHP_EOL);
+                    return;
                 }
             }
-            echo ('Vehículo No encontrado.'.PHP_EOL);
-            
+    
+            $marca = readline('Ingrese la marca del vehículo: ');
+            $modelo = readline('Ingrese el modelo del vehículo: ');
+            $dniCliTit = readline('Ingrese el DNI del titular del vehículo: ');
+    
+            if (!isset($this->serviceCliente->getClientes()[$dniCliTit])) {
+                echo ('El cliente con el DNI proporcionado no existe.' . PHP_EOL);
+                return;
+            }
+    
+            $vehiculo = new Vehiculo($patente, $marca, $modelo, $dniCliTit);
+            $this->cars[$patente] = $vehiculo;
+    
             $conexion = ConexionBD::obtenerInstancia();
             $bd = $conexion->obtenerConexion();
-            $delVeh = "DELETE FROM vehiculos WHERE patente = '$patente'";   
-
-            if ($bd->query($delVeh) === TRUE) {
-                echo ('El vehículo se ha eliminado de la base de datos.'.PHP_EOL);
-                return true;
+    
+            $addVeh = "INSERT INTO vehiculos (patente, marca, modelo, dni_cliente) VALUES ('$patente', '$marca', '$modelo', '$dniCliTit')";
+    
+            if ($bd->query($addVeh) === TRUE) {
+                echo ('Vehículo agregado correctamente a la base de datos.' . PHP_EOL);
             } else {
-                echo ('Error, el vehículo no fue eliminado.' . $bd->error .PHP_EOL);
-                return false;
+                echo ('Error al agregar el vehículo. ' . $bd->error . PHP_EOL);
             }
+        }
+
+        
+        public function modificarAuto() {
+            $patente = readline('Ingrese patente: ');
+
+            if (isset($this->cars[$patente])) {
+                $auto = $this->cars[$patente];
+
+                $newPatente = readline('Ingrese nueva patente: ');
+                $newMarca = readline('Ingrese nueva Marca: ');
+                $newModelo = readline('Ingrese nuevo Modelo: ');
+                $newDniTit = readline('Ingrese nuevo DNI de Titular: ');
+
+                $clientes = $this->serviceCliente->getClientes();
+                if (!isset($clientes[$newDniTit])) {
+                    echo 'El DNI del nuevo titular no existe. No se puede modificar el vehículo.'.PHP_EOL;
+                    return;
+                }
+
+                $auto->setPatente($newPatente);
+                $auto->setMarca($newMarca);
+                $auto->setModelo($newModelo);
+                $auto->setDniCliTit($newDniTit);
+
+                if ($newPatente !== $patente) {
+                    unset($this->cars[$patente]);
+                    $this->cars[$newPatente] = $auto;
+                }
+
+                echo ('Vehículo modificado.'. PHP_EOL);
+
+                $conexion = ConexionBD::obtenerInstancia();
+                $bd = $conexion->obtenerConexion();
+                $modVeh = "UPDATE vehiculos 
+                    SET patente='$newPatente', 
+                        marca='$newMarca', 
+                        modelo='$newModelo', 
+                        dni_cliente='$newDniTit'
+                    WHERE patente='$patente'";
+        
+                if ($bd->query($modVeh) === TRUE) {
+                    echo ('El Vehículo se ha modificado en la base de datos.' . PHP_EOL);
+                    return true;
+                } else {
+                    echo ('Error al modificar el vehículo en la base de datos.' . PHP_EOL);
+                    return false;
+                }
+            } else {
+                echo ('No se encontró el vehículo.'. PHP_EOL);
+                return false; 
+            }
+            
+        }
+    
+        
+        public function eliminarAuto() {          
+            $patente = readline('Ingrese Patente: ');    
+            
+            if (isset($this->cars[$patente])) {
+                unset($this->cars[$patente]);
+                echo ('El vehículo se ha eliminado.'.PHP_EOL);
+
+                $conexion = ConexionBD::obtenerInstancia();
+                $bd = $conexion->obtenerConexion();
+                $delVeh = "DELETE FROM vehiculos WHERE patente = '$patente'";   
+
+                if ($bd->query($delVeh) === TRUE) {
+                    echo ('Vehículo eliminado de la base de datos.'.PHP_EOL);
+                    return true;
+                } else {
+                    echo ('Error, el vehículo no fue eliminado.' . $bd->error .PHP_EOL);
+                    return false;
+                }
+            } else {
+                echo ('Vehículo no encontrado.' . PHP_EOL);
+            }          
         }
 
         public function mostrarVehiculos() {
-            $conexion = ConexionBD::obtenerInstancia();
-            $bd = $conexion->obtenerConexion();
-        
-            $getVehiculos = "SELECT * FROM vehiculos";
-            $result = $bd->query($getVehiculos);
-        
-            if ($result->num_rows === 0) {
-                echo ('No hay Vehículos cargados.'.PHP_EOL); 
-                return false;
-            } 
-                echo ('Lista de Vehículos:'.PHP_EOL);
-                echo(PHP_EOL);
-                
-                while ($resultados = $result->fetch_assoc()) {
-                    echo ('Patente: '.$resultados['patente'].'; ');
-                    echo ('Marca: '.$resultados['marca'].'; ');
-                    echo ('Modelo: '.$resultados['modelo'].'; ');
-                    echo ('DNI de Cliente: '.$resultados['dni_cliente'].PHP_EOL);
-                    echo ('------------------------------------------------------------'); echo(PHP_EOL);
+
+            if (count($this->cars) > 0) {
+                echo ('Lista de Vehículos:' . PHP_EOL);
+                foreach ($this->cars as $auto) {
+                    echo ('Patente: ' . $auto->getPatente() . '; ');
+                    echo ('Marca: ' . $auto->getMarca() . '; ');
+                    echo ('Modelo: ' . $auto->getModelo() . '; ');
+                    echo ('DNI Titular: ' . $auto->getDniCliTit()); echo (PHP_EOL);
+                    echo ('-------------------------------------------------------------');
+                    echo (PHP_EOL);
                 }
-                return true;
-            
+            } else {
+                echo "No existen Vehículos en el sistema." . PHP_EOL;
+            }
         }
-        
+
+
         public function buscarAuto() {
             $patente = readline('Ingrese Patente: ');
         
@@ -180,17 +162,7 @@
                 return false;
             }
         }
-
-        /*
-        public function obtenerVehiculoPorPatente($patente) {
-            foreach ($this->cars as $vehiculo) {
-                if ($vehiculo->getPatente() == $patente) {
-                    return $vehiculo;
-                }
-            }
-            return null; 
-        }
-        */
+        
         
         public function mostrarAutosClientes() {
 
@@ -217,7 +189,6 @@
                 echo ('No se encontraron vehículos para el cliente con DNI: ' . $dniCliente . PHP_EOL);
             }
         }
-
         
         /*
         public function grabar() {
@@ -233,4 +204,26 @@
             $this->cars = $arrOrigVeh;
         }
         */
+
+        public function __construct($serviceCliente) {
+            $this->serviceCliente = $serviceCliente; 
+            $this->cargarAutos(); 
+        }
+
+    
+        private function cargarAutos() {
+            $conexion = ConexionBD::obtenerInstancia();
+            $bd = $conexion->obtenerConexion();
+    
+            $query = "SELECT patente, marca, modelo, dni_cliente FROM vehiculos";
+            $resultado = $bd->query($query);
+    
+            if ($resultado->num_rows > 0) {
+                while ($fila = $resultado->fetch_assoc()) {
+                    $auto = new Vehiculo($fila['patente'], $fila['marca'], $fila['modelo'], $fila['dni_cliente']);
+                    $this->cars[$fila['patente']] = $auto;
+                }
+            }
+        }
+        
     }
