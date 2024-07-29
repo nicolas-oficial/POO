@@ -143,63 +143,6 @@
             }
         }
 
-        /*
-        public function mostrarClientes() {
-            foreach ($this->clientes as $dni => $cliente) {
-                echo ('DNI: ' . $cliente->getDni() . '; ');
-                echo ('Nombre: ' . $cliente->getNombre() . '; ');
-                echo ('Apellido: ' . $cliente->getApellido() . '; ');
-                echo ('Teléfono: ' . $cliente->getTelefono() . '; ');
-                echo ('Email: ' . $cliente->getMail() . PHP_EOL);
-                echo ('--------------------------------------------------------------------------');
-                echo (PHP_EOL);
-            }
-        }
-            */
-        
-        /*
-        public function mostrarClientes() {
-
-            if (count($this->clientes) === 0) {
-                echo ('No existen clientes en el sistema.' .PHP_EOL);
-                return;
-            }
-
-            foreach ($this->clientes as $cliente) {
-                echo "DNI: " . $cliente->getDni() . PHP_EOL;
-                echo "Nombre: " . $cliente->getNombre() . PHP_EOL;
-                echo "Apellido: " . $cliente->getApellido() . PHP_EOL;
-                echo "Teléfono: " . $cliente->getTelefono() . PHP_EOL;
-                echo "Email: " . $cliente->getMail() . PHP_EOL;
-                echo "-----------------------------" . PHP_EOL;
-            }
-
-            $conexion = ConexionBD::obtenerInstancia();
-            $bd = $conexion->obtenerConexion();
-        
-            $getClientes = "SELECT * FROM clientes";
-            $result = $bd->query($getClientes);
-        
-            if ($result->num_rows === 0) {
-                echo ('No hay Clientes cargados.' . PHP_EOL);
-                return false;
-            }
-        
-            echo ('Lista de Clientes:' . PHP_EOL);
-            echo (PHP_EOL);
-        
-            while ($resultados = $result->fetch_assoc()) {
-                echo ('DNI: ' . $resultados['dni'] . '; ');
-                echo ('Nombre: ' . $resultados['nombre'] . '; ');
-                echo ('Apellido: ' . $resultados['apellido'] . '; ');
-                echo ('Tel: ' . $resultados['tel'] . '; ');
-                echo ('Mail: ' . $resultados['email'] . PHP_EOL);
-                echo ('------------------------------------------------------------');
-                echo (PHP_EOL);
-            }
-            return true;
-        }
-        */
         
         public function buscarCliente() {
             $dni = readline('El DNI a buscar es: ');
