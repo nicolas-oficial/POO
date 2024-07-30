@@ -190,21 +190,6 @@
             }
         }
         
-        /*
-        public function grabar() {
-            $arrSerVeh = serialize($this->cars);
-            file_put_contents("autos.json", $arrSerVeh);
-            //print_r ($arrSer); echo(PHP_EOL);
-        }
-
-        public function leer() {
-            $recArrVeh = file_get_contents("autos.json");
-            $arrOrigVeh = unserialize($recArrVeh);
-            //print_r ($arrOrig);
-            $this->cars = $arrOrigVeh;
-        }
-        */
-
         public function __construct($serviceCliente) {
             $this->serviceCliente = $serviceCliente; 
             $this->cargarAutos(); 
