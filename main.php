@@ -5,23 +5,20 @@
     require_once('serviceVehiculo.php');
     require_once('turnoServicio.php');
     require_once('serviceTurnoServicio.php');
-    require_once('facturacion.php');
+    require_once('gestorservicios.php');
+    require_once('servicio.php');
     require_once('lib/conexion.php');
       
     $servicioCliente = new ServiceCliente();
-    $servicioVehiculo = new ServiceVehiculo();
+    $servicioVehiculo = new ServiceVehiculo($servicioCliente);
     $serviceTurnoServicio = new ServiceTurnoServicio();
-    $facturacion = new Facturacion();
+    $servicios = new ServiceServicio();
 
-   $conexion = ConexionBD::obtenerInstancia();
-   $bd = $conexion->obtenerConexion();
-    
-    //$servicioCliente->leer();
-    //$servicioVehiculo->leer();
-    //$serviceTurnoServicio->leer();
-    //$facturacion->leer();
-    
-    
+   
+
+    $conexion = ConexionBD::obtenerInstancia();
+    $bd = $conexion->obtenerConexion();
+      
     function menuPrincipal() {
         echo ('========= Bienvenidos =========='); echo(PHP_EOL);
         echo ('===== PosService AutoMotion ===='); echo(PHP_EOL);
@@ -31,7 +28,7 @@
         echo ('1-Clientes.'); echo(PHP_EOL);
         echo ('2-Vehículos.'); echo(PHP_EOL);
         echo ('3-Turnos.'); echo(PHP_EOL);
-        echo ('4-Facturación.'); echo(PHP_EOL);
+        echo ('4-Servicios.'); echo(PHP_EOL);
         echo ('0-Salir.'); echo(PHP_EOL);
     }
             
@@ -77,14 +74,16 @@
         echo ('0 - Salir.'); echo(PHP_EOL);
     }
 
-    function menuFacturacion() {
+    function menuServicio() {
 
         echo ('============================'); echo(PHP_EOL);
-        echo ('Menú Facturación.'); echo(PHP_EOL);
+        echo ('Menú Servicio.'); echo(PHP_EOL);
         echo ('============================'); echo(PHP_EOL);
-        echo ('1 - Confeccionar Factura.'); echo(PHP_EOL);
-        echo ('2 - Mostrar Factura.'); echo(PHP_EOL);
-        echo ('3 - Eliminar Factura.'); echo(PHP_EOL);
+        echo ('1 - Agregar Servicio.'); echo(PHP_EOL);
+        echo ('2 - Modificar  Servicio.'); echo(PHP_EOL);
+        echo ('3 - Eliminar Servicio.'); echo(PHP_EOL);
+        echo ('4 - Mostrar Servicios .'); echo(PHP_EOL);
+        echo ('5 - Facturacion .'); echo(PHP_EOL);
         echo ('0 - Salir.'); echo(PHP_EOL);
     }
     
@@ -140,10 +139,10 @@
                     switch ($opcionV) {
                         case 1: 
                             echo('Seleccionaste dar de alta a un vehículo.'.PHP_EOL);
-                            $servicioVehiculo->agregarAuto($servicioCliente); break;
+                            $servicioVehiculo->agregarAuto(); break;
                         case 2: 
                             echo('Seleccionaste modificar un vehículo.'.PHP_EOL);
-                            $servicioVehiculo->modificarAuto($servicioCliente); break;
+                            $servicioVehiculo->modificarAuto(); break;
                         case 3: 
                             echo('Seleccionaste eliminar un vehículo.'.PHP_EOL);
                             $servicioVehiculo->eliminarAuto(); break;
@@ -153,7 +152,7 @@
                         case 5: 
                             $servicioVehiculo->mostrarVehiculos(); break;
                         case 0: 
-                            //$servicioVehiculo->grabar(); break;
+                           
                             echo ('Regresar al Menú Principal.'.PHP_EOL); break;
                         default: 
                             echo ('Opción inválida.'.PHP_EOL);
@@ -170,7 +169,7 @@
                     switch ($opcionT) {
                         case 1:
                             echo ('Reservar Turno.'.PHP_EOL);
-                            $serviceTurnoServicio->reservaTurno($servicioCliente, $servicioVehiculo); break;
+                            $serviceTurnoServicio->reservaTurno(); break;
                         
                         case 2:
                             $serviceTurnoServicio->modificarTurno(); break;
@@ -196,23 +195,27 @@
                 break;
             
             case 4:
-                echo ('Facturación.'.PHP_EOL);
+                echo ('Servicio.'.PHP_EOL);
                 $opcionF = "";
                 while ($opcionF != 0) {
-                    menuFacturacion();
+                    menuServicio();
                     $opcionF = readline ('Ingrese una opción: ');
                     switch ($opcionF) {
                         case 1:
                             echo ('Confeccionar Factura: '); echo(PHP_EOL);
                             
-                            $facturacion->hacerFactura(); break;
+                            $servicios->agregarServicio(); break;
                         
                         case 2:
-                            $facturacion->mostrarFactura(); break; 
+                            $servicios->modificarServicio(); break; 
                         
                         case 3:
-                            $facturacion->eliminarFactura(); break;
-
+                            $servicios->eliminarServicio(); break;
+                        
+                        case 4:
+                                $servicios->mostrarServicios(); break;     
+                        case 5:
+                            $servicios->Facturacion(); break;    
                         case 0:
                             //$facturacion->guardar(); break;
                             echo ('Menú Principal.'.PHP_EOL); break;
@@ -222,7 +225,7 @@
                 }
                 break;
 
-            case 0: $servicioCliente->salida(); break;
+          
         }
        
     }
