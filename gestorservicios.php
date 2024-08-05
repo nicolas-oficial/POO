@@ -6,16 +6,13 @@ class ServiceServicio {
     private $servicios = [];
     private $vehiculos = []; 
 
-    public function __construct() {
-        $this->cargarServicios();
-        $this->cargarVehiculos(); 
-    }
 
        public function agregarServicio() {
         $turnoId = readline('Ingrese el ID del turno: ');
     
         $conexion = ConexionBD::obtenerInstancia();
         $bd = $conexion->obtenerConexion();
+
         $getTurno = "SELECT id, patente, fecha FROM turnos WHERE id = '$turnoId'";
         $resultTurno = $bd->query($getTurno);
     
@@ -58,7 +55,6 @@ class ServiceServicio {
         if (isset($this->servicios[$id])) {
             $servicio = $this->servicios[$id];
     
-            // Verificar si el servicio está cerrado
             if (strtolower($servicio->getEstado()) === 'cerrado') {
                 echo ('El servicio está cerrado y no se puede modificar.' . PHP_EOL);
                 return;
@@ -89,6 +85,7 @@ class ServiceServicio {
             echo ('Servicio no encontrado.' . PHP_EOL);
         }
     }
+    
 
     public function eliminarServicio() {
         $id = readline('Ingrese el id del servicio a eliminar: ');
@@ -119,7 +116,7 @@ class ServiceServicio {
                 echo ('Descripción: ' . $servicio->getDescripcion() . '; ');
                 echo ('Precio: ' . $servicio->getCosto() . '; ');
                 echo ('Patente: ' . $servicio->getPatente() . '; ');
-                echo ('Estado: ' . $servicio->getEstado() . '; ');
+                echo ('Estado: ' . $servicio->getEstado() . '; '); echo(PHP_EOL);
                 echo ('--------------------------------------------------------------------------');
                 echo (PHP_EOL);
             }
@@ -172,6 +169,14 @@ class ServiceServicio {
             }
         } 
     }
+
+
+    public function __construct() {
+        $this->cargarServicios();
+        $this->cargarVehiculos(); 
+    }
+
+
     private function cargarServicios() {
         $conexion = ConexionBD::obtenerInstancia();
         $bd = $conexion->obtenerConexion();
