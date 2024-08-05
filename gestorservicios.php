@@ -1,56 +1,17 @@
 <?php
 require_once('Servicio.php');
-require_once('Vehiculo.php'); // Asegúrate de incluir el archivo de la clase Vehiculo
+require_once('Vehiculo.php'); 
 
 class ServiceServicio {
     private $servicios = [];
-    private $vehiculos = []; // Array para almacenar los vehículos
+    private $vehiculos = []; 
 
     public function __construct() {
         $this->cargarServicios();
-        $this->cargarVehiculos(); // Cargar vehículos al inicializar
+        $this->cargarVehiculos(); 
     }
 
-    private function cargarServicios() {
-        $conexion = ConexionBD::obtenerInstancia();
-        $bd = $conexion->obtenerConexion();
-        $query = "SELECT s.id, v.patente, s.descripcion, s.costo, s.estado, s.turno_id, t.fecha AS fecha_turno
-                  FROM servicios s
-                  JOIN turnos t ON s.turno_id = t.id
-                  JOIN vehiculos v ON v.patente = t.patente";
-
-        $resultado = $bd->query($query);
-
-        if ($resultado->num_rows > 0) {
-            while ($fila = $resultado->fetch_assoc()) {
-                $servicio = new Servicio(
-                    $fila['id'], 
-                    $fila['patente'], 
-                    $fila['descripcion'], 
-                    $fila['costo'], 
-                    $fila['estado'], 
-                    $fila['turno_id'], 
-                    $fila['fecha_turno']
-                );
-                $this->servicios[$fila['id']] = $servicio;
-            }
-        }
-    }
-
-    private function cargarVehiculos() {
-        $conexion = ConexionBD::obtenerInstancia();
-        $bd = $conexion->obtenerConexion();
-        $query = "SELECT patente FROM vehiculos";
-        $resultado = $bd->query($query);
-
-        if ($resultado->num_rows > 0) {
-            while ($fila = $resultado->fetch_assoc()) {
-                $this->vehiculos[$fila['patente']] = true; // Simple validación usando array
-            }
-        }
-    }
-
-    public function agregarServicio() {
+       public function agregarServicio() {
         $turnoId = readline('Ingrese el ID del turno: ');
     
         $conexion = ConexionBD::obtenerInstancia();
@@ -91,26 +52,6 @@ class ServiceServicio {
         }
     }
     
-    
-
-    public function eliminarServicio() {
-        $id = readline('Ingrese el id del servicio a eliminar: ');
-
-        if (isset($this->servicios[$id])) {
-            unset($this->servicios[$id]);
-            $conexion = ConexionBD::obtenerInstancia();
-            $bd = $conexion->obtenerConexion();
-            $delServ = "DELETE FROM servicios WHERE id = '$id'";
-
-            if ($bd->query($delServ) === TRUE) {
-                echo ('Servicio eliminado correctamente de la base de datos.' . PHP_EOL);
-            } else {
-                echo ('Error al eliminar el servicio: ' . $bd->error . PHP_EOL);
-            }
-        } else {
-            echo ('Servicio no encontrado.' . PHP_EOL);
-        }
-    }
     public function modificarServicio() {
         $id = readline('Ingrese el id del servicio a modificar: ');
     
@@ -148,6 +89,26 @@ class ServiceServicio {
             echo ('Servicio no encontrado.' . PHP_EOL);
         }
     }
+
+    public function eliminarServicio() {
+        $id = readline('Ingrese el id del servicio a eliminar: ');
+
+        if (isset($this->servicios[$id])) {
+            unset($this->servicios[$id]);
+            $conexion = ConexionBD::obtenerInstancia();
+            $bd = $conexion->obtenerConexion();
+            $delServ = "DELETE FROM servicios WHERE id = '$id'";
+
+            if ($bd->query($delServ) === TRUE) {
+                echo ('Servicio eliminado correctamente de la base de datos.' . PHP_EOL);
+            } else {
+                echo ('Error al eliminar el servicio: ' . $bd->error . PHP_EOL);
+            }
+        } else {
+            echo ('Servicio no encontrado.' . PHP_EOL);
+        }
+    }
+    
     
     public function mostrarServicios() {
         if (count($this->servicios) > 0) {
@@ -168,33 +129,33 @@ class ServiceServicio {
     }
 
     public function calcularCostoServiciosCerrados() {
-        $costosPorVehiculo = [];
+        $costos = [];
 
         foreach ($this->servicios as $servicio) {
             if ($servicio->getEstado() === 'cerrado') {
                 $patente = $servicio->getPatente();
-                if (!isset($costosPorVehiculo[$patente])) {
-                    $costosPorVehiculo[$patente] = [
+                if (!isset($costos[$patente])) {
+                    $costos[$patente] = [
                         'Costo Total' => 0,
                         'Servicios' => []
                     ];
                 }
-                $costosPorVehiculo[$patente]['Costo Total'] += $servicio->getCosto();
-                $costosPorVehiculo[$patente]['Servicios'][] = [
+                $costos[$patente]['Costo Total'] += $servicio->getCosto();
+                $costos[$patente]['Servicios'][] = [
                     'Descripción' => $servicio->getDescripcion(),
                     'Costo' => $servicio->getCosto()
                 ];
             }
         }
 
-        return $costosPorVehiculo;
+        return $costos;
     }
 
     public function Facturacion() {
         $facturacion = $this->calcularCostoServiciosCerrados();
     
         if (count($facturacion) > 0) {
-            echo "Facturación detallada por vehículo:" . PHP_EOL;
+            echo "Facturación detallada :" . PHP_EOL;
             foreach ($facturacion as $patente => $datos) {
                 echo "Patente: $patente" . PHP_EOL;
                 echo "Descripción:" . PHP_EOL;
@@ -209,9 +170,47 @@ class ServiceServicio {
                 echo "Costo Total (suma de servicios): " . number_format($totalServicios, 2) . PHP_EOL;
                 echo '--------------------------------------------------------------------------' . PHP_EOL;
             }
-        } else {
-            echo "No hay servicios cerrados para mostrar." . PHP_EOL;
+        } 
+    }
+    private function cargarServicios() {
+        $conexion = ConexionBD::obtenerInstancia();
+        $bd = $conexion->obtenerConexion();
+        $query = "SELECT s.id, v.patente, s.descripcion, s.costo, s.estado, s.turno_id, t.fecha AS fecha_turno
+                  FROM servicios s
+                  JOIN turnos t ON s.turno_id = t.id
+                  JOIN vehiculos v ON v.patente = t.patente";
+
+        $resultado = $bd->query($query);
+
+        if ($resultado->num_rows > 0) {
+            while ($fila = $resultado->fetch_assoc()) {
+                $servicio = new Servicio(
+                    $fila['id'], 
+                    $fila['patente'], 
+                    $fila['descripcion'], 
+                    $fila['costo'], 
+                    $fila['estado'], 
+                    $fila['turno_id'], 
+                    $fila['fecha_turno']
+                );
+                $this->servicios[$fila['id']] = $servicio;
+            }
         }
     }
+
+    private function cargarVehiculos() {
+        $conexion = ConexionBD::obtenerInstancia();
+        $bd = $conexion->obtenerConexion();
+        $query = "SELECT patente FROM vehiculos";
+        $resultado = $bd->query($query);
+
+        if ($resultado->num_rows > 0) {
+            while ($fila = $resultado->fetch_assoc()) {
+                $this->vehiculos[$fila['patente']] = true; 
+            }
+        }
+    }
+
+
 }
 
