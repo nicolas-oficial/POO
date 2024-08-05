@@ -7,7 +7,7 @@ class Servicio {
     private $costo;
     private $estado;
     private $turno_id;
-    private $fecha_turno; // Renombrado para mayor claridad
+    private $fecha_turno; 
 
     public function __construct($id, $patente, $descripcion, $costo, $estado, $turno_id, $fecha_turno = null) {
         $this->id = $id;
